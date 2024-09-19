@@ -1,5 +1,7 @@
 import orderModel from "../models/orderModel.js";
 import userModel from '../models/userModel.js';
+import adminUserModel from "../models/adminUserModel.js";
+
 import Stripe from 'stripe';
 import "dotenv/config"
 
@@ -92,9 +94,19 @@ const userOrders = async (req, res) => {
     }
 }
 
+
 //Listing orders for admin panel
 const listOrders = async (req, res) => {
+
     try {
+        
+        // Access user ID from the JWT (optional, if needed)
+        const userId = req.user.id;
+        const user = await adminUserModel.findById(userId)
+        if(!user) {
+            return res.status(400).json({ success: false, message: "Admin not found" })
+        }
+   
         const orders = await orderModel.find({});
         res.json({success: true, data: orders})
     } catch (error) {
@@ -102,9 +114,17 @@ const listOrders = async (req, res) => {
         res.json({success: true, message: "Error"})
     }
 }
+
 //api for updating order status
 const updateStatus = async (req, res) => {
-    try {
+    try {   
+        // Access user ID from the JWT (optional, if needed)
+        const userId = req.user.id;
+        const user = await adminUserModel.findById(userId)
+        if(!user) {
+            return res.status(400).json({ success: false, message: "Admin not found" })
+        }
+   
         await orderModel.findByIdAndUpdate(req.body.orderId, {status: req.body.status});
         res.json({success: true, message: "Status Updated"})
     } catch (error) {   

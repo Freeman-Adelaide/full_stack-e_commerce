@@ -1,6 +1,7 @@
 import express from 'express';
 import { addFood, listFood, removeFood } from '../controller/foodController.js';
 import multer from 'multer';
+import adminAuthMiddleware from '../middleware/adminAuth.js';
 
 const foodRouter = express.Router();
 
@@ -15,9 +16,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({storage: storage})
 
-foodRouter.post('/add', upload.single("image"), addFood)
-foodRouter.get('/list', listFood)
-foodRouter.post('/remove', removeFood)
+foodRouter.post('/add', adminAuthMiddleware, upload.single("image"), addFood)
+foodRouter.get('/list', adminAuthMiddleware, listFood)
+foodRouter.post('/remove', adminAuthMiddleware, removeFood)
 
 
 

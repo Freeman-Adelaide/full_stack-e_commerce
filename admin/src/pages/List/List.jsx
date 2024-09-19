@@ -7,7 +7,22 @@ const List = ({url}) => {
   const [list, setList] = useState([]);
 
   const fetchList = async () => {
-    const response = await axios.get(`${url}/api/food/list`)
+
+    const token = await localStorage.getItem('adminToken'); // Retrieve token from localStorage
+
+      if(!token){
+        //If there's no token, return an error message early
+        toast.error("Unauthorized: Please log in");
+        return;
+      }
+      console.log(token)
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+      
+    const response = await axios.get(`${url}/api/food/list`, config)
     if(response.data.success){
       setList(response.data.data)
     }

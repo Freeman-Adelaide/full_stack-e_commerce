@@ -9,21 +9,55 @@ const Orders = ({url}) => {
   const [orders, setOrders ] = useState([])
 
   const fetchAllOrders = async () => {
-    const response = await axios.get(url+"/api/order/list");
+
+    const token = await localStorage.getItem('adminToken'); // Retrieve token from localStorage
+
+      if(!token){
+        //If there's no token, return an error message early
+        toast.error("Unauthorized: Please log in");
+        return;
+      }
+      console.log(token)
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+      
+    const response = await axios.get(url+"/api/order/list", config);
     if (response.data.success) {
-      setOrders(response.data.data);
-      console.log(response.data.data)
-    }
-    else{
-      toast.error("Error")
+      // Check if data is an array
+      if (Array.isArray(response.data.data)) {
+        setOrders(response.data.data);
+      } else {
+        toast.error("Unexpected data format");
+      }
+    } else {
+      toast.error("Error");
     }
   }
 
   const statusHandler = async (event, orderId) => {
+    
+    const token = await localStorage.getItem('adminToken'); // Retrieve token from localStorage
+
+      if(!token){
+        //If there's no token, return an error message early
+        toast.error("Unauthorized: Please log in");
+        return;
+      }
+      console.log(token)
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+      
+
     const response = await axios.post(url+"/api/order/status", {
       orderId,
       status: event.target.value
-    })
+    }, config)
     if(response.data.success){
       fetchAllOrders()
     }

@@ -22,27 +22,51 @@ const Add = ({url}) => {
 
   const onSubmitHandler = async (event) => {
       event.preventDefault();
+
+      const token = await localStorage.getItem('adminToken'); // Retrieve token from localStorage
+
+      if(!token){
+        //If there's no token, return an error message early
+        toast.error("Unauthorized: Please log in");
+        return;
+      }
+      console.log(token)
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+      
+      //prepare form data
       const formData = new FormData();
       formData.append("name", data.name)
       formData.append("description", data.description)
       formData.append("price", Number(data.price))
       formData.append("category", data.category)
       formData.append("image", image)
-      const response = await axios.post(`${url}/api/food/add`, formData)
+    
+    try {
+      const response = await axios.post(`${url}/api/food/add`, formData, config)
       if(response.data.success) {
-          setData({
-            name: "",
-            description: "",
-            price: "",
-            category: "Salad"
-        })
-        setImage(false) 
-        toast.success(response.data.message)    
-      }
-      else{
-          toast.error(response.data.message)
-      } 
-  }
+        setData({
+          name: "",
+          description: "",
+          price: "",
+          category: "Salad"
+      })
+      setImage(false) 
+      toast.success(response.data.message)    
+    }
+    else{
+        //Handle case were success is false but no error is thrown
+        toast.error(response.data.message)
+    }
+    
+    } catch (error) {
+      //Catch and display any error that occurs during the request
+      toast.error("An error occurred while adding the food. Please try again.");
+    }
+  };
 
   return (
     <div className='add'>
